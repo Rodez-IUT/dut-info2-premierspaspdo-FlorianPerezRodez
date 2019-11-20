@@ -1,0 +1,1 @@
+Erreur car le code entré dans la recherche est interprété.
