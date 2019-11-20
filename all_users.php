@@ -30,7 +30,7 @@
 				throw new PDOException($e->getMessage(),(int)$e->getCode());
 			}
 		?>
-			<form action="all_users.php" method="post">
+			<form action="all_users.php" method="get">
 				Start with letter: <input type="text" name="letter" value="" /> 
 				and status is: 
 				<select name="status">
@@ -41,13 +41,15 @@
 				<input type="submit" value="OK" />
 			</form>
 		<?php
-			if(isset($_POST['letter'])){
+			if(isset($_GET['letter'])){
 				// je suis passé par le formulaire, affichage du résultat de la requête.
-				$lettreUsername = $_POST['letter'].'%';
-				$statusNumber = $_POST['status'];
+				$lettreUsername = $_GET['letter'].'%';
+				$statusNumber = $_GET['status'];
 				echo "<table>";
 				echo "<tr><th>Id</th><th>Username</th><th>Email</th><th>Status</th></tr>";
-				$stmt=$pdo->query("SELECT * FROM users WHERE username LIKE '$lettreUsername' AND status_id=$statusNumber ORDER BY username");
+				//  $stmt=$pdo->query("SELECT * FROM users WHERE username LIKE '$lettreUsername' AND status_id=$statusNumber ORDER BY username");
+				$stmt=$pdo->prepare('SELECT * FROM users WHERE username LIKE :name AND status_id = :status ORDER BY username');
+				$stmt->execute(['name' => $lettreUsername, 'status' => $statusNumber]);
 				while($row=$stmt->fetch()){
 					echo "<tr><td>".$row['id']."</td>"."<td>".$row['username']."</td>"."<td>".$row['email']."</td>"."<td>";
 					if ($row['status_id'] == 1) {
