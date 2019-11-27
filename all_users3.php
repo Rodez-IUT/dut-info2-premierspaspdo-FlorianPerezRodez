@@ -34,9 +34,12 @@
 				Start with letter: <input type="text" name="letter" value="" /> 
 				and status is: 
 				<select name="status">
-				   <option value="Waiting for account validation">Waiting for account validation</option>
-				   <option value="Active account" selected="selected">Active account</option>
-				   <option value="Waiting for account deletion">Waiting for account deletion</option>
+				   <!-- <option value="2" <?php if (get("status")==2) echo 'selected' ?> >Active account</option>
+				   <option value="1" <?php if (get("status_id")==1) echo 'selected' ?>>Waiting for account confirmation</option>
+				   <option value="3" <?php if (get("status")==3) echo 'selected' ?> >Waiting for account deletion</option> -->
+				   <option value="1">Waiting for account confirmation</option>
+				   <option value="2" selected="selected">Active account</option>
+				   <option value="3">Waiting for account deletion</option>
 				</select>
 				<input type="submit" value="OK" />
 			</form>
@@ -46,31 +49,36 @@
 				$lettreUsername = $_GET['letter'].'%';
 				$statusState = $_GET['status'];
 				echo "<table>";
-				echo "<tr><th>Id</th><th>Username</th><th>Email</th><th>Status</th><th></th></tr>";			
-				$stmt=$pdo->prepare('SELECT users.id as user_id, status_id, username, email, s.name as status
-				FROM users join status s on users.status_id = s.id
+				echo "<tr><th>Id</th><th>Username</th><th>Email</th><th>Status</th><th></th></tr>";
+				//  $stmt=$pdo->query("SELECT * FROM users WHERE username LIKE '$lettreUsername' AND status_id=$statusNumber ORDER BY username");
+				$stmt=$pdo->prepare('SELECT *				
+				FROM users				
 				WHERE username LIKE :name 
-				AND s.name = :status ORDER BY username');
+				AND status_id = :status ORDER BY username');
 				$stmt->execute(['name' => $lettreUsername, 'status' => $statusState]);
 				while($row=$stmt->fetch()){
-					echo "<tr><td>".$row['user_id']."</td>"."<td>".$row['username']."</td>"."<td>".$row['email']."</td>"."<td>".$row['status'];
-					if ($row['status'] != 'Waiting for account deletion') {
-						echo "</td><td><a onclick='' href='http://localhost:8080/dut-info2-premierspaspdo-FlorianPerezRodez/all_users.php?status_id=3&user_id=".$row['user_id']."&action=askDeletion'>ask deletion</a>";
-					}						
+					echo "<tr><td>".$row['id']."</td>"."<td>".$row['username']."</td>"."<td>".$row['email']."</td>"."<td>";
+					if ($row['status_id'] == 1) {
+						echo 'Waiting for account confirmation'."</td><td><a onclick='' href='http://localhost:8080/dut-info2-premierspaspdo-FlorianPerezRodez/all_users.php?letter".$row['id']."=&status=3'>ask deletion</a>";
+					} else if ($row['status_id'] == 2) {
+						echo 'Active account'."</td><td>";
+					} else if ($row['status_id'] == 3) {
+						echo 'Waiting for account deletion'."</td><td>";
+					}	
 					echo "</td></tr>";
 				}
 				echo "</table>";
 			} else {
 				// Affichage instruction
 				echo "<table>";
-				echo "<tr><th>Id</th><th>Username</th><th>Email</th><th>Status</th><th></th></tr>";
+				echo "<tr><th>Id</th><th>Username</th><th>Email</th><th>Status</th></tr>";
 				$stmt=$pdo->query("SELECT * FROM users");
 				while($row=$stmt->fetch()){
 					echo "<tr><td>".$row['id']."</td>"."<td>".$row['username']."</td>"."<td>".$row['email']."</td>"."<td>";
 					if ($row['status_id'] == 1) {
-						echo 'Waiting for account validation'."</td><td><a onclick='' href='http://localhost:8080/dut-info2-premierspaspdo-FlorianPerezRodez/all_users.php?status_id=3&user_id=".$row['id']."&action=askDeletion'>ask deletion</a>";
+						echo 'Waiting for account confirmation';
 					} else if ($row['status_id'] == 2) {
-						echo 'Active account'."</td><td><a onclick='' href='http://localhost:8080/dut-info2-premierspaspdo-FlorianPerezRodez/all_users.php?status_id=3&user_id=".$row['id']."&action=askDeletion'>ask deletion</a>";
+						echo 'Active account';
 					} else if ($row['status_id'] == 3) {
 						echo 'Waiting for account deletion';
 					}			
